@@ -54,13 +54,13 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
   const days = getDays();
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg overflow-hidden transition-colors duration-200">
       {/* Calendar Header */}
-      <div className="grid grid-cols-3 border-b border-gray-200">
+      <div className="grid grid-cols-3 border-b border-neutral-200 dark:border-neutral-700">
         {days.map((day, index) => (
           <div key={index} className="p-4 text-center">
-            <div className="text-sm text-gray-500">{day.label}</div>
-            <div className="text-lg font-semibold">
+            <div className="text-sm text-neutral-500 dark:text-neutral-400">{day.label}</div>
+            <div className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
               {day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </div>
           </div>
@@ -70,17 +70,19 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
       {/* Calendar Grid */}
       <div className="relative">
         {/* Time Slots */}
-        <div className="absolute left-0 w-16 border-r border-gray-200">
+        <div className="absolute left-0 w-16 border-r border-neutral-200 dark:border-neutral-700">
           {timeSlots.map((time, index) => {
             const hour = Math.floor(index / 2);
             return (
               <div
                 key={time}
-                className={`h-20 border-b border-gray-100 flex items-center justify-end pr-2 ${
-                  isDaytime(hour) ? 'bg-amber-50' : 'bg-gray-50'
+                className={`h-20 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-end pr-2 ${
+                  isDaytime(hour) 
+                    ? 'bg-primary-50 dark:bg-primary-900/20' 
+                    : 'bg-neutral-50 dark:bg-neutral-900/50'
                 }`}
               >
-                <span className="text-xs text-gray-400">{time}</span>
+                <span className="text-xs text-neutral-400 dark:text-neutral-500">{time}</span>
               </div>
             );
           })}
@@ -89,15 +91,17 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
         {/* Calendar Columns */}
         <div className="grid grid-cols-3 ml-16">
           {days.map((day, dayIndex) => (
-            <div key={dayIndex} className="relative border-r border-gray-200 last:border-r-0">
+            <div key={dayIndex} className="relative border-r border-neutral-200 dark:border-neutral-700 last:border-r-0">
               {/* Time Grid Lines */}
               {timeSlots.map((_, index) => {
                 const hour = Math.floor(index / 2);
                 return (
                   <div
                     key={index}
-                    className={`h-20 border-b border-gray-100 ${
-                      isDaytime(hour) ? 'bg-amber-50' : 'bg-gray-50'
+                    className={`h-20 border-b border-neutral-100 dark:border-neutral-700 ${
+                      isDaytime(hour) 
+                        ? 'bg-primary-50 dark:bg-primary-900/20' 
+                        : 'bg-neutral-50 dark:bg-neutral-900/50'
                     }`}
                   />
                 );
@@ -114,17 +118,17 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
                     key={task.id}
                     className={`absolute left-2 right-2 rounded-lg p-2 cursor-move transition-all duration-200 ${
                       task.completed 
-                        ? 'bg-green-100 border border-green-200' 
-                        : 'bg-blue-100 border border-blue-200 hover:bg-blue-200'
+                        ? 'bg-accent-100 dark:bg-accent-900/50 border border-accent-200 dark:border-accent-800' 
+                        : 'bg-secondary-100 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-800/70'
                     }`}
                     style={getTaskPosition(task)}
                     onClick={() => onUpdateTask({ ...task, completed: !task.completed })}
                   >
-                    <div className="font-medium text-sm truncate">{task.title}</div>
+                    <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
                     {task.description && (
-                      <div className="text-xs text-gray-600 truncate">{task.description}</div>
+                      <div className="text-xs text-neutral-600 dark:text-neutral-300 truncate">{task.description}</div>
                     )}
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                       {new Date(task.startTime).toLocaleTimeString('en-US', { 
                         hour: 'numeric', 
                         minute: '2-digit',
