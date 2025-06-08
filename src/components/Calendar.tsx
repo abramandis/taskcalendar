@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Task } from '../types';
 
 interface CalendarProps {
@@ -7,11 +7,23 @@ interface CalendarProps {
 }
 
 const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
-  const timeSlots = Array.from({ length: 24 * 6 }, (_, i) => {
-    const hour = Math.floor(i / 6);
-    const minute = (i % 6) * 10;
+  // Generate time slots for every 30 minutes
+  const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
+    const hour = Math.floor(i / 2);
+    const minute = (i % 2) * 30;
     return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
   });
+
+  // Calculate sunrise and sunset times (simplified for demo)
+  const { sunriseHour, sunsetHour } = useMemo(() => {
+    const now = new Date();
+    const month = now.getMonth();
+    // Approximate sunrise/sunset times based on month (northern hemisphere)
+    // These are rough estimates - in a real app, you'd want to use a proper sunrise/sunset API
+    const sunriseHour = month >= 2 && month <= 8 ? 6 : 7; // Summer: 6am, Winter: 7am
+    const sunsetHour = month >= 2 && month <= 8 ? 20 : 17; // Summer: 8pm, Winter: 5pm
+    return { sunriseHour, sunsetHour };
+  }, []);
 
   const getDays = () => {
     const today = new Date();
@@ -25,12 +37,18 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
   const getTaskPosition = (task: Task) => {
     const startHour = task.startTime.getHours();
     const startMinute = task.startTime.getMinutes();
-    const startIndex = startHour * 6 + Math.floor(startMinute / 10);
-    const height = (task.duration / 10) * 40; // 40px per 10 minutes
+    // Convert to 30-minute block position
+    const startIndex = startHour * 2 + Math.floor(startMinute / 30);
+    // Convert duration to 30-minute blocks (rounding up)
+    const height = Math.ceil(task.duration / 30) * 80; // 80px per 30 minutes
     return {
-      top: `${startIndex * 40}px`,
+      top: `${startIndex * 80}px`,
       height: `${height}px`,
     };
+  };
+
+  const isDaytime = (hour: number) => {
+    return hour >= sunriseHour && hour < sunsetHour;
   };
 
   const days = getDays();
@@ -53,14 +71,19 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
       <div className="relative">
         {/* Time Slots */}
         <div className="absolute left-0 w-16 border-r border-gray-200">
-          {timeSlots.map((time, index) => (
-            <div
-              key={time}
-              className="h-10 border-b border-gray-100 flex items-center justify-end pr-2"
-            >
-              <span className="text-xs text-gray-400">{time}</span>
-            </div>
-          ))}
+          {timeSlots.map((time, index) => {
+            const hour = Math.floor(index / 2);
+            return (
+              <div
+                key={time}
+                className={`h-20 border-b border-gray-100 flex items-center justify-end pr-2 ${
+                  isDaytime(hour) ? 'bg-amber-50' : 'bg-gray-50'
+                }`}
+              >
+                <span className="text-xs text-gray-400">{time}</span>
+              </div>
+            );
+          })}
         </div>
 
         {/* Calendar Columns */}
@@ -68,12 +91,17 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
           {days.map((day, dayIndex) => (
             <div key={dayIndex} className="relative border-r border-gray-200 last:border-r-0">
               {/* Time Grid Lines */}
-              {timeSlots.map((_, index) => (
-                <div
-                  key={index}
-                  className="h-10 border-b border-gray-100"
-                />
-              ))}
+              {timeSlots.map((_, index) => {
+                const hour = Math.floor(index / 2);
+                return (
+                  <div
+                    key={index}
+                    className={`h-20 border-b border-gray-100 ${
+                      isDaytime(hour) ? 'bg-amber-50' : 'bg-gray-50'
+                    }`}
+                  />
+                );
+              })}
 
               {/* Tasks */}
               {tasks
@@ -102,6 +130,13 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
                         minute: '2-digit',
                         hour12: true 
                       })}
+                      {' - '}
+                      {new Date(new Date(task.startTime).getTime() + task.duration * 60000)
+                        .toLocaleTimeString('en-US', { 
+                          hour: 'numeric', 
+                          minute: '2-digit',
+                          hour12: true 
+                        })}
                     </div>
                   </div>
                 ))}
