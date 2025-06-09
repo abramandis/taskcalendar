@@ -1,6 +1,8 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Task } from '../types';
 import { TaskEditForm } from './TaskEditForm';
+import { useSound } from '../contexts/SoundContext';
+import { SoundManager } from '../utils/sounds';
 
 interface CalendarProps {
   tasks: Task[];
@@ -22,6 +24,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
   const [dropTarget, setDropTarget] = useState<{ day: Date; time: string } | null>(null);
   const [hoveredTask, setHoveredTask] = useState<HoverState | null>(null);
   const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null);
+  const soundManager = SoundManager.getInstance();
 
   // Update current time every minute
   useEffect(() => {
@@ -252,6 +255,15 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
     };
   }, [hoveredTask]);
 
+  // Update the completion handler
+  const handleTaskComplete = useCallback((task: Task, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!task.completed) {
+      soundManager.play('TASK_COMPLETE');
+    }
+    onUpdateTask({ ...task, completed: !task.completed });
+  }, [onUpdateTask]);
+
   return (
     <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg overflow-hidden transition-colors duration-200">
       {/* Calendar Header */}
@@ -384,6 +396,11 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              if (task.completed) {
+                                soundManager.play('TASK_INCOMPLETE');
+                              } else {
+                                soundManager.play('TASK_COMPLETE');
+                              }
                               onUpdateTask({ ...task, completed: !task.completed });
                             }}
                             className={`flex-shrink-0 w-5 h-5 rounded-full transition-all duration-300 transform hover:scale-110 ${

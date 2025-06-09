@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Calendar from './components/Calendar';
 import DayMetrics from './components/DayMetrics';
 import { Task } from './types';
+import { SoundProvider } from './contexts/SoundContext';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -39,37 +40,39 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 transition-colors duration-200">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-50">Task Calendar</h1>
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-100 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors"
-          >
-            {isDarkMode ? '☀️' : '🌙'}
-          </button>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <Calendar 
-              tasks={tasks} 
-              onUpdateTask={updateTask} 
-              onAddTask={addTask}
-              onDeleteTask={deleteTask}
-            />
+    <SoundProvider>
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 transition-colors duration-200">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-50">Task Calendar</h1>
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-100 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors"
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
           </div>
-          <div>
-            <DayMetrics 
-              tasks={tasks}
-              date={new Date()}
-              sunriseHour={6}
-              sunsetHour={20}
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <Calendar 
+                tasks={tasks} 
+                onUpdateTask={updateTask} 
+                onAddTask={addTask}
+                onDeleteTask={deleteTask}
+              />
+            </div>
+            <div>
+              <DayMetrics 
+                tasks={tasks}
+                date={new Date()}
+                sunriseHour={6}
+                sunsetHour={20}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </SoundProvider>
   );
 }
 
