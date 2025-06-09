@@ -27,10 +27,14 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
 
   const getDays = () => {
     const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const nextDay = new Date(today);
+    nextDay.setDate(today.getDate() + 2);
     return [
       { date: today, label: 'Today' },
-      { date: new Date(today.setDate(today.getDate() + 1)), label: 'Tomorrow' },
-      { date: new Date(today.setDate(today.getDate() + 1)), label: new Date(today).toLocaleDateString('en-US', { weekday: 'long' }) }
+      { date: tomorrow, label: 'Tomorrow' },
+      { date: nextDay, label: nextDay.toLocaleDateString('en-US', { weekday: 'long' }) }
     ];
   };
 
@@ -59,7 +63,9 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
       <div className="grid grid-cols-3 border-b border-neutral-200 dark:border-neutral-700">
         {days.map((day, index) => (
           <div key={index} className="p-4 text-center">
-            <div className="text-sm text-neutral-500 dark:text-neutral-400">{day.label}</div>
+            <div className="text-sm text-neutral-500 dark:text-neutral-400">
+              {day.date.toLocaleDateString('en-US', { weekday: 'long' })}
+            </div>
             <div className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
               {day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </div>
