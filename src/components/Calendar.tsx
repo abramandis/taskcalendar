@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Task } from '../types';
 
 interface CalendarProps {
@@ -10,6 +10,26 @@ interface CalendarProps {
 const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) => {
   const [quickAddTask, setQuickAddTask] = useState<{ day: Date; time: string } | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update current time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Calculate the position of the current time line
+  const getCurrentTimePosition = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    // Convert to 30-minute block position (2 blocks per hour)
+    const position = (hours * 2) + (minutes / 30);
+    return `${position * 40}px`; // 40px per 30-minute block
+  };
 
   // Generate time slots for every 30 minutes
   const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
@@ -176,6 +196,16 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
           <div className="flex-1 grid grid-cols-3">
             {days.map((day, dayIndex) => (
               <div key={dayIndex} className="relative border-r border-neutral-200 dark:border-neutral-700 last:border-r-0">
+                {/* Current Time Indicator - only show for today */}
+                {day.date.toDateString() === new Date().toDateString() && (
+                  <div 
+                    className="absolute left-0 right-0 h-0.5 bg-blue-500 dark:bg-blue-400 z-10"
+                    style={{ top: getCurrentTimePosition() }}
+                  >
+                    <div className="absolute -left-2 w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400 -translate-y-1/2" />
+                  </div>
+                )}
+
                 {/* Time Grid Lines */}
                 {timeSlots.map((time, index) => {
                   const hour = Math.floor(index / 2);
