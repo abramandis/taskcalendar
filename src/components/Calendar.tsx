@@ -206,13 +206,12 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                   .map((task) => (
                     <div
                       key={task.id}
-                      className={`absolute left-2 right-2 rounded-lg p-2 cursor-move transition-all duration-200 ${
+                      className={`absolute left-2 right-2 rounded-lg p-2 transition-all duration-200 ${
                         task.completed 
                           ? 'bg-accent-100 dark:bg-accent-900/50 border border-accent-200 dark:border-accent-800' 
                           : 'bg-secondary-100 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-800/70'
                       }`}
                       style={getTaskPosition(task)}
-                      onClick={() => onUpdateTask({ ...task, completed: !task.completed })}
                       onDoubleClick={() => handleTaskDoubleClick(task)}
                     >
                       {editingTask?.id === task.id ? (
@@ -241,7 +240,25 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                           </div>
                         </form>
                       ) : (
-                        <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onUpdateTask({ ...task, completed: !task.completed });
+                            }}
+                            className={`flex-shrink-0 w-5 h-5 rounded-full transition-all duration-300 transform hover:scale-110 ${
+                              task.completed
+                                ? 'bg-accent-500 dark:bg-accent-400 shadow-lg shadow-accent-500/30'
+                                : 'bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600'
+                            }`}
+                            title={task.completed ? "Task completed! 🎉" : "Complete task"}
+                          >
+                            {task.completed && (
+                              <span className="flex items-center justify-center w-full h-full text-xs text-white animate-[bounce_0.5s_ease-in-out_1]">✓</span>
+                            )}
+                          </button>
+                        </div>
                       )}
                     </div>
                   ))}
