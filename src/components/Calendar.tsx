@@ -216,7 +216,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                       onDoubleClick={() => handleTaskDoubleClick(task)}
                     >
                       {editingTask?.id === task.id ? (
-                        <form onSubmit={handleEditSubmit} className="space-y-2">
+                        <form onSubmit={handleEditSubmit} className="space-y-2 bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-2 border border-neutral-200 dark:border-neutral-700 z-50 relative">
                           <input
                             type="text"
                             name="title"
