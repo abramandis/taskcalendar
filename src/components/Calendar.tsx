@@ -264,6 +264,37 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
     onUpdateTask({ ...task, completed: !task.completed });
   }, [onUpdateTask]);
 
+  // Add this handler function
+  const handleTaskFormKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const form = e.currentTarget.form;
+      if (form) {
+        form.requestSubmit();
+      }
+    }
+  };
+
+  // Add this effect to ensure focus works
+  useEffect(() => {
+    if (editingTask) {
+      const textarea = document.querySelector('textarea[name="title"]') as HTMLTextAreaElement;
+      if (textarea) {
+        textarea.focus();
+        // Optionally move cursor to end of text
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      }
+    }
+  }, [editingTask]);
+
+  // Add this effect to focus the create task form
+  useEffect(() => {
+    const textarea = document.querySelector('textarea[name="title"]') as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.focus();
+    }
+  }, []); // Empty dependency array means this runs once on mount
+
   return (
     <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg overflow-hidden transition-colors duration-200">
       {/* Calendar Header */}
@@ -432,10 +463,16 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                   >
                     <textarea
                       name="title"
-                      placeholder="Task title"
-                      className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50 resize-none"
+                      placeholder="Add a new task..."
                       autoFocus
-                      rows={2}
+                      className="w-full p-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-accent-500 dark:focus:ring-accent-400 resize-none"
+                      rows={1}
+                      onKeyDown={handleTaskFormKeyDown}
+                      onInput={(e) => {
+                        const target = e.target as HTMLTextAreaElement;
+                        target.style.height = 'auto';
+                        target.style.height = target.scrollHeight + 'px';
+                      }}
                     />
                     <div className="flex justify-end mt-2 space-x-2">
                       <button
