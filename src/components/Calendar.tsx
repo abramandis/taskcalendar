@@ -5,14 +5,21 @@ interface CalendarProps {
   tasks: Task[];
   onUpdateTask: (task: Task) => void;
   onAddTask: (task: Task) => void;
+  onDeleteTask: (taskId: string) => void;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) => {
+interface HoverState {
+  taskId: string;
+  timeout: NodeJS.Timeout;
+}
+
+const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onDeleteTask }) => {
   const [quickAddTask, setQuickAddTask] = useState<{ day: Date; time: string } | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [dropTarget, setDropTarget] = useState<{ day: Date; time: string } | null>(null);
+  const [hoveredTask, setHoveredTask] = useState<HoverState | null>(null);
 
   // Update current time every minute
   useEffect(() => {
@@ -215,6 +222,32 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
     setDropTarget(null);
   };
 
+  // Add hover handlers
+  const handleTaskHover = (taskId: string) => {
+    if (hoveredTask) {
+      clearTimeout(hoveredTask.timeout);
+    }
+    const timeout = setTimeout(() => {
+      setHoveredTask({ taskId, timeout });
+    }, 1000); // 1 second delay
+  };
+
+  const handleTaskLeave = () => {
+    if (hoveredTask) {
+      clearTimeout(hoveredTask.timeout);
+      setHoveredTask(null);
+    }
+  };
+
+  // Add cleanup effect
+  useEffect(() => {
+    return () => {
+      if (hoveredTask) {
+        clearTimeout(hoveredTask.timeout);
+      }
+    };
+  }, [hoveredTask]);
+
   return (
     <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg overflow-hidden transition-colors duration-200">
       {/* Calendar Header */}
@@ -315,10 +348,14 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                   .map((task) => (
                     <div
                       key={task.id}
-                      draggable
+                      draggable={editingTask?.id !== task.id}
                       onDragStart={(e) => handleDragStart(e, task)}
                       onDragEnd={handleDragEnd}
-                      className={`absolute left-2 right-2 rounded-lg p-2 cursor-move transition-all duration-200 ${
+                      onMouseEnter={() => handleTaskHover(task.id)}
+                      onMouseLeave={handleTaskLeave}
+                      className={`absolute left-2 right-2 rounded-lg p-2 ${
+                        editingTask?.id !== task.id ? 'cursor-move' : 'cursor-default'
+                      } transition-all duration-200 ${
                         task.completed 
                           ? 'bg-accent-100 dark:bg-accent-900/50 border border-accent-200 dark:border-accent-800' 
                           : 'bg-secondary-100 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-800/70'
@@ -328,24 +365,39 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                     >
                       {editingTask?.id === task.id ? (
                         <form onSubmit={handleEditSubmit} className="space-y-2 bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-2 border border-neutral-200 dark:border-neutral-700 z-50 relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteTask(task.id);
+                            }}
+                            className="absolute -right-3 -top-3 w-5 h-5 rounded-full transition-all duration-300 transform hover:scale-110 bg-red-100/90 dark:bg-red-900/60 hover:bg-red-200 dark:hover:bg-red-800 text-red-500 dark:text-red-400 shadow-lg border border-red-200/90 dark:border-red-800/90"
+                            title="Delete task"
+                          >
+                            <span className="flex items-center justify-center w-full h-full text-xs">×</span>
+                          </button>
                           <textarea
                             name="title"
                             defaultValue={task.title}
-                            className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50 resize-none"
+                            className="w-full p-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-accent-500 dark:focus:ring-accent-400 resize-none"
+                            rows={1}
+                            onInput={(e) => {
+                              const target = e.target as HTMLTextAreaElement;
+                              target.style.height = 'auto';
+                              target.style.height = target.scrollHeight + 'px';
+                            }}
                             autoFocus
-                            rows={2}
                           />
-                          <div className="flex justify-end space-x-2">
+                          <div className="flex justify-end gap-2">
                             <button
                               type="button"
                               onClick={() => setEditingTask(null)}
-                              className="px-2 py-1 text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50"
+                              className="px-3 py-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50"
                             >
                               Cancel
                             </button>
                             <button
                               type="submit"
-                              className="px-2 py-1 text-xs bg-primary-500 text-white rounded hover:bg-primary-600"
+                              className="px-3 py-1 text-sm bg-accent-500 dark:bg-accent-400 text-white rounded-lg hover:bg-accent-600 dark:hover:bg-accent-500 transition-colors"
                             >
                               Save
                             </button>

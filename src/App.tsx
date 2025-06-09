@@ -34,6 +34,10 @@ function App() {
     ));
   };
 
+  const deleteTask = (taskId: string) => {
+    setTasks(tasks.filter(task => task.id !== taskId));
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 transition-colors duration-200">
       <div className="container mx-auto px-4 py-8">
@@ -52,6 +56,7 @@ function App() {
               tasks={tasks} 
               onUpdateTask={updateTask} 
               onAddTask={addTask}
+              onDeleteTask={deleteTask}
             />
           </div>
           <div>
