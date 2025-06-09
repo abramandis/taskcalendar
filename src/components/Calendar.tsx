@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Task } from '../types';
 
 interface CalendarProps {
@@ -11,6 +11,8 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
   const [quickAddTask, setQuickAddTask] = useState<{ day: Date; time: string } | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+  const [dropTarget, setDropTarget] = useState<{ day: Date; time: string } | null>(null);
 
   // Update current time every minute
   useEffect(() => {
@@ -147,6 +149,72 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
     }
   };
 
+  // Function to check if a time slot is occupied
+  const isTimeSlotOccupied = (day: Date, time: string) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    return tasks.some(task => {
+      const taskDate = new Date(task.startTime);
+      return (
+        taskDate.toDateString() === day.toDateString() &&
+        taskDate.getHours() === hours &&
+        taskDate.getMinutes() === minutes
+      );
+    });
+  };
+
+  // Function to handle drag start
+  const handleDragStart = (e: React.DragEvent, task: Task) => {
+    e.dataTransfer.setData('text/plain', task.id);
+    setDraggedTask(task);
+    // Add a semi-transparent effect to the dragged task
+    if (e.target instanceof HTMLElement) {
+      e.target.style.opacity = '0.5';
+    }
+  };
+
+  // Function to handle drag end
+  const handleDragEnd = (e: React.DragEvent) => {
+    setDraggedTask(null);
+    setDropTarget(null);
+    // Reset opacity
+    if (e.target instanceof HTMLElement) {
+      e.target.style.opacity = '1';
+    }
+  };
+
+  // Function to handle drag over
+  const handleDragOver = (e: React.DragEvent, day: Date, time: string) => {
+    e.preventDefault();
+    if (!isTimeSlotOccupied(day, time)) {
+      setDropTarget({ day, time });
+    }
+  };
+
+  // Function to handle drop
+  const handleDrop = (e: React.DragEvent, day: Date, time: string) => {
+    e.preventDefault();
+    if (!draggedTask || isTimeSlotOccupied(day, time)) return;
+
+    const [hours, minutes] = time.split(':').map(Number);
+    const newStartTime = new Date(day);
+    newStartTime.setHours(hours);
+    newStartTime.setMinutes(minutes);
+
+    onUpdateTask({
+      ...draggedTask,
+      startTime: newStartTime
+    });
+
+    setDraggedTask(null);
+    setDropTarget(null);
+  };
+
+  // Function to handle drag leave
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDropTarget(null);
+  };
+
   return (
     <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg overflow-hidden transition-colors duration-200">
       {/* Calendar Header */}
@@ -210,6 +278,10 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                 {timeSlots.map((time, index) => {
                   const hour = Math.floor(index / 2);
                   const isHalfHour = index % 2 === 1;
+                  const isOccupied = isTimeSlotOccupied(day.date, time);
+                  const isDropTarget = dropTarget?.day.toDateString() === day.date.toDateString() && 
+                                    dropTarget?.time === time;
+
                   return (
                     <div
                       key={index}
@@ -221,8 +293,15 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                         isDaytime(hour) 
                           ? 'bg-primary-50 dark:bg-primary-900/20' 
                           : 'bg-neutral-50 dark:bg-neutral-900/50'
+                      } ${
+                        isDropTarget && !isOccupied
+                          ? 'bg-primary-100 dark:bg-primary-800/30'
+                          : ''
                       }`}
                       onDoubleClick={() => handleDoubleClick(day.date, time)}
+                      onDragOver={(e) => handleDragOver(e, day.date, time)}
+                      onDrop={(e) => handleDrop(e, day.date, time)}
+                      onDragLeave={handleDragLeave}
                     />
                   );
                 })}
@@ -236,7 +315,10 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                   .map((task) => (
                     <div
                       key={task.id}
-                      className={`absolute left-2 right-2 rounded-lg p-2 transition-all duration-200 ${
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, task)}
+                      onDragEnd={handleDragEnd}
+                      className={`absolute left-2 right-2 rounded-lg p-2 cursor-move transition-all duration-200 ${
                         task.completed 
                           ? 'bg-accent-100 dark:bg-accent-900/50 border border-accent-200 dark:border-accent-800' 
                           : 'bg-secondary-100 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-800/70'
