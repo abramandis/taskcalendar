@@ -117,13 +117,11 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
     e.preventDefault();
     const form = e.currentTarget;
     const title = (form.elements.namedItem('title') as HTMLInputElement).value;
-    const description = (form.elements.namedItem('description') as HTMLTextAreaElement).value;
 
     if (editingTask) {
       onUpdateTask({
         ...editingTask,
-        title,
-        description
+        title
       });
       setEditingTask(null);
     }
@@ -226,12 +224,6 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                             className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50"
                             autoFocus
                           />
-                          <textarea
-                            name="description"
-                            defaultValue={task.description}
-                            className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50"
-                            rows={2}
-                          />
                           <div className="flex justify-end space-x-2">
                             <button
                               type="button"
@@ -249,12 +241,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                           </div>
                         </form>
                       ) : (
-                        <>
-                          <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
-                          {task.description && (
-                            <div className="text-xs text-neutral-600 dark:text-neutral-300 truncate">{task.description}</div>
-                          )}
-                        </>
+                        <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
                       )}
                     </div>
                   ))}
