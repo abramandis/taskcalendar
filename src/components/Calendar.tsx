@@ -1,12 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Task } from '../types';
 
 interface CalendarProps {
   tasks: Task[];
   onUpdateTask: (task: Task) => void;
+  onAddTask: (task: Task) => void;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
+const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) => {
+  const [quickAddTask, setQuickAddTask] = useState<{ day: Date; time: string } | null>(null);
+
   // Generate time slots for every 30 minutes
   const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
     const hour = Math.floor(i / 2);
@@ -78,6 +81,33 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
     });
   };
 
+  const handleDoubleClick = (day: Date, time: string) => {
+    setQuickAddTask({ day, time });
+  };
+
+  const handleQuickAddSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const title = (form.elements.namedItem('title') as HTMLInputElement).value;
+    const [hours, minutes] = quickAddTask!.time.split(':').map(Number);
+    
+    const startTime = new Date(quickAddTask!.day);
+    startTime.setHours(hours);
+    startTime.setMinutes(minutes);
+
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title,
+      description: '',
+      startTime,
+      duration: 30, // Default to 30 minutes
+      completed: false,
+    };
+
+    onAddTask(newTask);
+    setQuickAddTask(null);
+  };
+
   return (
     <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg overflow-hidden transition-colors duration-200">
       {/* Calendar Header */}
@@ -128,7 +158,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
             {days.map((day, dayIndex) => (
               <div key={dayIndex} className="relative border-r border-neutral-200 dark:border-neutral-700 last:border-r-0">
                 {/* Time Grid Lines */}
-                {timeSlots.map((_, index) => {
+                {timeSlots.map((time, index) => {
                   const hour = Math.floor(index / 2);
                   const isHalfHour = index % 2 === 1;
                   return (
@@ -143,6 +173,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
                           ? 'bg-primary-50 dark:bg-primary-900/20' 
                           : 'bg-neutral-50 dark:bg-neutral-900/50'
                       }`}
+                      onDoubleClick={() => handleDoubleClick(day.date, time)}
                     />
                   );
                 })}
@@ -168,11 +199,44 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
                       {task.description && (
                         <div className="text-xs text-neutral-600 dark:text-neutral-300 truncate">{task.description}</div>
                       )}
-                      <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                        {formatTime(new Date(task.startTime), false)}
-                      </div>
                     </div>
                   ))}
+
+                {/* Quick Add Form */}
+                {quickAddTask && 
+                 quickAddTask.day.toDateString() === day.date.toDateString() && 
+                 timeSlots.some(t => t === quickAddTask.time) && (
+                  <form
+                    onSubmit={handleQuickAddSubmit}
+                    className="absolute left-2 right-2 bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-2 border border-neutral-200 dark:border-neutral-700"
+                    style={{
+                      top: `${timeSlots.findIndex(t => t === quickAddTask.time) * 40}px`,
+                    }}
+                  >
+                    <input
+                      type="text"
+                      name="title"
+                      placeholder="Task title"
+                      className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50"
+                      autoFocus
+                    />
+                    <div className="flex justify-end mt-2 space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setQuickAddTask(null)}
+                        className="px-2 py-1 text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-2 py-1 text-xs bg-primary-500 text-white rounded hover:bg-primary-600"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
             ))}
           </div>
