@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Task } from '../types';
+import { TaskEditForm } from './TaskEditForm';
 
 interface CalendarProps {
   tasks: Task[];
@@ -20,6 +21,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [dropTarget, setDropTarget] = useState<{ day: Date; time: string } | null>(null);
   const [hoveredTask, setHoveredTask] = useState<HoverState | null>(null);
+  const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null);
 
   // Update current time every minute
   useEffect(() => {
@@ -138,7 +140,9 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
     setQuickAddTask(null);
   };
 
-  const handleTaskDoubleClick = (task: Task) => {
+  const handleTaskDoubleClick = (task: Task, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setClickPosition({ x: e.clientX, y: e.clientY });
     setEditingTask(task);
   };
 
@@ -331,7 +335,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                           ? 'bg-primary-100 dark:bg-primary-800/30'
                           : ''
                       }`}
-                      onDoubleClick={() => handleDoubleClick(day.date, time)}
+                      onDoubleClick={(e) => handleDoubleClick(day.date, time)}
                       onDragOver={(e) => handleDragOver(e, day.date, time)}
                       onDrop={(e) => handleDrop(e, day.date, time)}
                       onDragLeave={handleDragLeave}
@@ -361,48 +365,19 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                           : 'bg-secondary-100 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-800/70'
                       }`}
                       style={getTaskPosition(task)}
-                      onDoubleClick={() => handleTaskDoubleClick(task)}
+                      onDoubleClick={(e) => handleTaskDoubleClick(task, e)}
                     >
-                      {editingTask?.id === task.id ? (
-                        <form onSubmit={handleEditSubmit} className="space-y-2 bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-2 border border-neutral-200 dark:border-neutral-700 z-50 relative">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDeleteTask(task.id);
-                            }}
-                            className="absolute -right-3 -top-3 w-5 h-5 rounded-full transition-all duration-300 transform hover:scale-110 bg-red-100/90 dark:bg-red-900/60 hover:bg-red-200 dark:hover:bg-red-800 text-red-500 dark:text-red-400 shadow-lg border border-red-200/90 dark:border-red-800/90"
-                            title="Delete task"
-                          >
-                            <span className="flex items-center justify-center w-full h-full text-xs">×</span>
-                          </button>
-                          <textarea
-                            name="title"
-                            defaultValue={task.title}
-                            className="w-full p-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-accent-500 dark:focus:ring-accent-400 resize-none"
-                            rows={1}
-                            onInput={(e) => {
-                              const target = e.target as HTMLTextAreaElement;
-                              target.style.height = 'auto';
-                              target.style.height = target.scrollHeight + 'px';
-                            }}
-                            autoFocus
-                          />
-                          <div className="flex justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setEditingTask(null)}
-                              className="px-3 py-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              type="submit"
-                              className="px-3 py-1 text-sm bg-accent-500 dark:bg-accent-400 text-white rounded-lg hover:bg-accent-600 dark:hover:bg-accent-500 transition-colors"
-                            >
-                              Save
-                            </button>
-                          </div>
-                        </form>
+                      {editingTask?.id === task.id && clickPosition ? (
+                        <TaskEditForm
+                          task={task}
+                          clickPosition={clickPosition}
+                          onDeleteTask={onDeleteTask}
+                          onEditSubmit={handleEditSubmit}
+                          onCancel={() => {
+                            setEditingTask(null);
+                            setClickPosition(null);
+                          }}
+                        />
                       ) : (
                         <div className="flex items-center justify-between gap-2">
                           <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
