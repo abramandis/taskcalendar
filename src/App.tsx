@@ -4,13 +4,20 @@ import TaskForm from './components/TaskForm';
 import { Task } from './types';
 
 function App() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const savedTasks = localStorage.getItem('tasks');
+    return savedTasks ? JSON.parse(savedTasks) : [];
+  });
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   useEffect(() => {
     // Set dark mode by default
     document.documentElement.classList.add('dark');
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
