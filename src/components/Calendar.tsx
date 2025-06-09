@@ -246,12 +246,12 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                     >
                       {editingTask?.id === task.id ? (
                         <form onSubmit={handleEditSubmit} className="space-y-2 bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-2 border border-neutral-200 dark:border-neutral-700 z-50 relative">
-                          <input
-                            type="text"
+                          <textarea
                             name="title"
                             defaultValue={task.title}
-                            className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50"
+                            className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50 resize-none"
                             autoFocus
+                            rows={2}
                           />
                           <div className="flex justify-end space-x-2">
                             <button
@@ -285,7 +285,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                             title={task.completed ? "Task completed! 🎉" : "Complete task"}
                           >
                             {task.completed && (
-                              <span className="flex items-center justify-center w-full h-full text-xs text-white animate-[bounce_0.5s_ease-in-out_1]">✓</span>
+                              <span className="flex items-center justify-center w-full h-full text-xs text-white animate-[bounce_0.8s_ease-in-out_1]">✓</span>
                             )}
                           </button>
                         </div>
@@ -304,12 +304,12 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                       top: `${timeSlots.findIndex(t => t === quickAddTask.time) * 40}px`,
                     }}
                   >
-                    <input
-                      type="text"
+                    <textarea
                       name="title"
                       placeholder="Task title"
-                      className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50"
+                      className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50 resize-none"
                       autoFocus
+                      rows={2}
                     />
                     <div className="flex justify-end mt-2 space-x-2">
                       <button
