@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Calendar from './components/Calendar';
-import TaskForm from './components/TaskForm';
 import DayMetrics from './components/DayMetrics';
 import { Task } from './types';
 
@@ -55,14 +54,13 @@ function App() {
               onAddTask={addTask}
             />
           </div>
-          <div className="space-y-8">
+          <div>
             <DayMetrics 
               tasks={tasks}
               date={new Date()}
               sunriseHour={6}
               sunsetHour={20}
             />
-            <TaskForm onAddTask={addTask} />
           </div>
         </div>
       </div>
