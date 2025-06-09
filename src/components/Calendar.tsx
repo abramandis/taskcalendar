@@ -73,16 +73,23 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
         <div className="absolute left-0 w-16 border-r border-neutral-200 dark:border-neutral-700">
           {timeSlots.map((time, index) => {
             const hour = Math.floor(index / 2);
+            const isHalfHour = index % 2 === 1;
             return (
               <div
                 key={time}
-                className={`h-20 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-end pr-2 ${
+                className={`h-10 border-b ${
+                  isHalfHour 
+                    ? 'border-dashed border-neutral-200 dark:border-neutral-700' 
+                    : 'border-neutral-100 dark:border-neutral-700'
+                } flex items-center justify-end pr-2 ${
                   isDaytime(hour) 
                     ? 'bg-primary-50 dark:bg-primary-900/20' 
                     : 'bg-neutral-50 dark:bg-neutral-900/50'
                 }`}
               >
-                <span className="text-xs text-neutral-400 dark:text-neutral-500">{time}</span>
+                {!isHalfHour && (
+                  <span className="text-xs text-neutral-400 dark:text-neutral-500">{time}</span>
+                )}
               </div>
             );
           })}
@@ -95,10 +102,15 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
               {/* Time Grid Lines */}
               {timeSlots.map((_, index) => {
                 const hour = Math.floor(index / 2);
+                const isHalfHour = index % 2 === 1;
                 return (
                   <div
                     key={index}
-                    className={`h-20 border-b border-neutral-100 dark:border-neutral-700 ${
+                    className={`h-10 border-b ${
+                      isHalfHour 
+                        ? 'border-dashed border-neutral-200 dark:border-neutral-700' 
+                        : 'border-neutral-100 dark:border-neutral-700'
+                    } ${
                       isDaytime(hour) 
                         ? 'bg-primary-50 dark:bg-primary-900/20' 
                         : 'bg-neutral-50 dark:bg-neutral-900/50'
