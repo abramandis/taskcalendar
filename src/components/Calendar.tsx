@@ -9,6 +9,7 @@ interface CalendarProps {
 
 const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) => {
   const [quickAddTask, setQuickAddTask] = useState<{ day: Date; time: string } | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   // Generate time slots for every 30 minutes
   const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
@@ -108,6 +109,26 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
     setQuickAddTask(null);
   };
 
+  const handleTaskDoubleClick = (task: Task) => {
+    setEditingTask(task);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const title = (form.elements.namedItem('title') as HTMLInputElement).value;
+    const description = (form.elements.namedItem('description') as HTMLTextAreaElement).value;
+
+    if (editingTask) {
+      onUpdateTask({
+        ...editingTask,
+        title,
+        description
+      });
+      setEditingTask(null);
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg overflow-hidden transition-colors duration-200">
       {/* Calendar Header */}
@@ -194,10 +215,46 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask }) =
                       }`}
                       style={getTaskPosition(task)}
                       onClick={() => onUpdateTask({ ...task, completed: !task.completed })}
+                      onDoubleClick={() => handleTaskDoubleClick(task)}
                     >
-                      <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
-                      {task.description && (
-                        <div className="text-xs text-neutral-600 dark:text-neutral-300 truncate">{task.description}</div>
+                      {editingTask?.id === task.id ? (
+                        <form onSubmit={handleEditSubmit} className="space-y-2">
+                          <input
+                            type="text"
+                            name="title"
+                            defaultValue={task.title}
+                            className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50"
+                            autoFocus
+                          />
+                          <textarea
+                            name="description"
+                            defaultValue={task.description}
+                            className="w-full px-2 py-1 text-sm bg-transparent border border-neutral-200 dark:border-neutral-700 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-neutral-50"
+                            rows={2}
+                          />
+                          <div className="flex justify-end space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => setEditingTask(null)}
+                              className="px-2 py-1 text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              className="px-2 py-1 text-xs bg-primary-500 text-white rounded hover:bg-primary-600"
+                            >
+                              Save
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <>
+                          <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
+                          {task.description && (
+                            <div className="text-xs text-neutral-600 dark:text-neutral-300 truncate">{task.description}</div>
+                          )}
+                        </>
                       )}
                     </div>
                   ))}
