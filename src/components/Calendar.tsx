@@ -39,14 +39,14 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
   };
 
   const getTaskPosition = (task: Task) => {
-    const startHour = task.startTime.getHours();
-    const startMinute = task.startTime.getMinutes();
+    const startHour = new Date(task.startTime).getHours();
+    const startMinute = new Date(task.startTime).getMinutes();
     // Convert to 30-minute block position
     const startIndex = startHour * 2 + Math.floor(startMinute / 30);
     // Convert duration to 30-minute blocks (rounding up)
-    const height = Math.ceil(task.duration / 30) * 80; // 80px per 30 minutes
+    const height = Math.ceil(task.duration / 30) * 40; // 40px per 30 minutes (h-10)
     return {
-      top: `${startIndex * 80}px`,
+      top: `${startIndex * 40}px`,
       height: `${height}px`,
     };
   };
@@ -57,10 +57,31 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
 
   const days = getDays();
 
+  const getTasksForTimeSlot = (date: Date, timeSlot: Date) => {
+    return tasks.filter(task => {
+      const taskDate = new Date(task.startTime);
+      return (
+        taskDate.getDate() === date.getDate() &&
+        taskDate.getMonth() === date.getMonth() &&
+        taskDate.getFullYear() === date.getFullYear() &&
+        taskDate.getHours() === timeSlot.getHours() &&
+        taskDate.getMinutes() === timeSlot.getMinutes()
+      );
+    });
+  };
+
+  const formatTime = (date: Date, isMilitaryTime: boolean) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: isMilitaryTime ? 'numeric' : '2-digit',
+      minute: '2-digit',
+      hour12: !isMilitaryTime
+    });
+  };
+
   return (
     <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg overflow-hidden transition-colors duration-200">
       {/* Calendar Header */}
-      <div className="grid grid-cols-3 border-b border-neutral-200 dark:border-neutral-700">
+      <div className="grid grid-cols-3 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
         {days.map((day, index) => (
           <div key={index} className="p-4 text-center">
             <div className="text-sm text-neutral-500 dark:text-neutral-400">
@@ -74,96 +95,87 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask }) => {
       </div>
 
       {/* Calendar Grid */}
-      <div className="relative">
-        {/* Time Slots */}
-        <div className="absolute left-0 w-16 border-r border-neutral-200 dark:border-neutral-700">
-          {timeSlots.map((time, index) => {
-            const hour = Math.floor(index / 2);
-            const isHalfHour = index % 2 === 1;
-            return (
-              <div
-                key={time}
-                className={`h-10 border-b ${
-                  isHalfHour 
-                    ? 'border-dashed border-neutral-200 dark:border-neutral-700' 
-                    : 'border-neutral-100 dark:border-neutral-700'
-                } flex items-center justify-end pr-2 ${
-                  isDaytime(hour) 
-                    ? 'bg-primary-50 dark:bg-primary-900/20' 
-                    : 'bg-neutral-50 dark:bg-neutral-900/50'
-                }`}
-              >
-                {!isHalfHour && (
-                  <span className="text-xs text-neutral-400 dark:text-neutral-500">{time}</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
+      <div className="relative h-[600px] overflow-y-auto">
+        <div className="flex">
+          {/* Time Slots */}
+          <div className="sticky left-0 w-16 border-r border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
+            {timeSlots.map((time, index) => {
+              const hour = Math.floor(index / 2);
+              const isHalfHour = index % 2 === 1;
+              return (
+                <div
+                  key={time}
+                  className={`h-10 border-b ${
+                    isHalfHour 
+                      ? 'border-dashed border-neutral-200 dark:border-neutral-700' 
+                      : 'border-neutral-100 dark:border-neutral-700'
+                  } flex items-center justify-end pr-2 ${
+                    isDaytime(hour) 
+                      ? 'bg-primary-50 dark:bg-primary-900/20' 
+                      : 'bg-neutral-50 dark:bg-neutral-900/50'
+                  }`}
+                >
+                  {!isHalfHour && (
+                    <span className="text-xs text-neutral-400 dark:text-neutral-500">{time}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
-        {/* Calendar Columns */}
-        <div className="grid grid-cols-3 ml-16">
-          {days.map((day, dayIndex) => (
-            <div key={dayIndex} className="relative border-r border-neutral-200 dark:border-neutral-700 last:border-r-0">
-              {/* Time Grid Lines */}
-              {timeSlots.map((_, index) => {
-                const hour = Math.floor(index / 2);
-                const isHalfHour = index % 2 === 1;
-                return (
-                  <div
-                    key={index}
-                    className={`h-10 border-b ${
-                      isHalfHour 
-                        ? 'border-dashed border-neutral-200 dark:border-neutral-700' 
-                        : 'border-neutral-100 dark:border-neutral-700'
-                    } ${
-                      isDaytime(hour) 
-                        ? 'bg-primary-50 dark:bg-primary-900/20' 
-                        : 'bg-neutral-50 dark:bg-neutral-900/50'
-                    }`}
-                  />
-                );
-              })}
+          {/* Calendar Columns */}
+          <div className="flex-1 grid grid-cols-3">
+            {days.map((day, dayIndex) => (
+              <div key={dayIndex} className="relative border-r border-neutral-200 dark:border-neutral-700 last:border-r-0">
+                {/* Time Grid Lines */}
+                {timeSlots.map((_, index) => {
+                  const hour = Math.floor(index / 2);
+                  const isHalfHour = index % 2 === 1;
+                  return (
+                    <div
+                      key={index}
+                      className={`h-10 border-b ${
+                        isHalfHour 
+                          ? 'border-dashed border-neutral-200 dark:border-neutral-700' 
+                          : 'border-neutral-100 dark:border-neutral-700'
+                      } ${
+                        isDaytime(hour) 
+                          ? 'bg-primary-50 dark:bg-primary-900/20' 
+                          : 'bg-neutral-50 dark:bg-neutral-900/50'
+                      }`}
+                    />
+                  );
+                })}
 
-              {/* Tasks */}
-              {tasks
-                .filter(task => {
-                  const taskDate = new Date(task.startTime);
-                  return taskDate.toDateString() === day.date.toDateString();
-                })
-                .map((task) => (
-                  <div
-                    key={task.id}
-                    className={`absolute left-2 right-2 rounded-lg p-2 cursor-move transition-all duration-200 ${
-                      task.completed 
-                        ? 'bg-accent-100 dark:bg-accent-900/50 border border-accent-200 dark:border-accent-800' 
-                        : 'bg-secondary-100 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-800/70'
-                    }`}
-                    style={getTaskPosition(task)}
-                    onClick={() => onUpdateTask({ ...task, completed: !task.completed })}
-                  >
-                    <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
-                    {task.description && (
-                      <div className="text-xs text-neutral-600 dark:text-neutral-300 truncate">{task.description}</div>
-                    )}
-                    <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                      {new Date(task.startTime).toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit',
-                        hour12: true 
-                      })}
-                      {' - '}
-                      {new Date(new Date(task.startTime).getTime() + task.duration * 60000)
-                        .toLocaleTimeString('en-US', { 
-                          hour: 'numeric', 
-                          minute: '2-digit',
-                          hour12: true 
-                        })}
+                {/* Tasks */}
+                {tasks
+                  .filter(task => {
+                    const taskDate = new Date(task.startTime);
+                    return taskDate.toDateString() === day.date.toDateString();
+                  })
+                  .map((task) => (
+                    <div
+                      key={task.id}
+                      className={`absolute left-2 right-2 rounded-lg p-2 cursor-move transition-all duration-200 ${
+                        task.completed 
+                          ? 'bg-accent-100 dark:bg-accent-900/50 border border-accent-200 dark:border-accent-800' 
+                          : 'bg-secondary-100 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-800/70'
+                      }`}
+                      style={getTaskPosition(task)}
+                      onClick={() => onUpdateTask({ ...task, completed: !task.completed })}
+                    >
+                      <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
+                      {task.description && (
+                        <div className="text-xs text-neutral-600 dark:text-neutral-300 truncate">{task.description}</div>
+                      )}
+                      <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                        {formatTime(new Date(task.startTime), false)}
+                      </div>
                     </div>
-                  </div>
-                ))}
-            </div>
-          ))}
+                  ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
