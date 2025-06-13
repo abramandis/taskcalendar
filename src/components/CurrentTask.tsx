@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Task } from '../types';
 
 interface CurrentTaskProps {
@@ -6,17 +6,26 @@ interface CurrentTaskProps {
 }
 
 const CurrentTask: React.FC<CurrentTaskProps> = ({ tasks }) => {
-  const now = new Date();
-  const currentTime = now.getHours() * 60 + now.getMinutes(); // Convert to minutes for easier comparison
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, []);
 
   const currentTask = tasks.find(task => {
     const taskStart = new Date(task.startTime);
-    const taskEnd = new Date(taskStart.getTime() + task.duration * 60000); // Convert duration to milliseconds
+    const taskEnd = new Date(taskStart.getTime() + task.duration * 60000);
     
     const taskStartMinutes = taskStart.getHours() * 60 + taskStart.getMinutes();
     const taskEndMinutes = taskEnd.getHours() * 60 + taskEnd.getMinutes();
+    const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
     
-    return currentTime >= taskStartMinutes && currentTime <= taskEndMinutes;
+    return nowMinutes >= taskStartMinutes && nowMinutes <= taskEndMinutes;
   });
 
   if (!currentTask) {
