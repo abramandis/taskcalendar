@@ -64,8 +64,8 @@ const Notes: React.FC = () => {
   const sortedDates = Object.keys(notesByDate).sort((a, b) => b.localeCompare(a));
 
   return (
-    <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg transition-colors duration-200 h-full">
-      <div className="h-full overflow-y-auto
+    <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg transition-colors duration-200">
+      <div className="max-h-[310px] min-h-[310px] overflow-y-auto
         [&::-webkit-scrollbar]:w-2
         [&::-webkit-scrollbar-track]:bg-transparent
         [&::-webkit-scrollbar-thumb]:rounded-full
@@ -120,7 +120,6 @@ const Notes: React.FC = () => {
             ))}
           </div>
         ))}
-        
       </div>
     </div>
   );

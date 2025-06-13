@@ -4,6 +4,7 @@ import DayMetrics from './components/DayMetrics';
 import { Task } from './types';
 import { SoundProvider } from './contexts/SoundContext';
 import Notes from './components/Notes';
+import CurrentTask from './components/CurrentTask';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -70,13 +71,14 @@ function App() {
                 onDeleteTask={deleteTask}
               />
             </div>
-            <div className="flex flex-col space-y-8 h-full">
+            <div className="flex flex-col space-y-6">
               <DayMetrics 
                 tasks={tasks}
                 date={new Date()}
                 sunriseHour={6}
                 sunsetHour={20}
               />
+              <CurrentTask tasks={tasks} />
               <div className="flex-1">
                 <Notes />
               </div>

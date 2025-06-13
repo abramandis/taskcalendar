@@ -328,7 +328,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
       </div>
 
       {/* Calendar Grid */}
-      <div className="relative h-[600px] overflow-y-auto
+      <div className="relative h-[625px] overflow-y-auto
         [&::-webkit-scrollbar]:w-2
         [&::-webkit-scrollbar-track]:bg-transparent
         [&::-webkit-scrollbar-thumb]:rounded-full
