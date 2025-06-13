@@ -70,14 +70,16 @@ function App() {
                 onDeleteTask={deleteTask}
               />
             </div>
-            <div className="space-y-8">
+            <div className="flex flex-col space-y-8 h-full">
               <DayMetrics 
                 tasks={tasks}
                 date={new Date()}
                 sunriseHour={6}
                 sunsetHour={20}
               />
-              <Notes />
+              <div className="flex-1">
+                <Notes />
+              </div>
             </div>
           </div>
         </div>

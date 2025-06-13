@@ -2,7 +2,7 @@ export const SOUNDS = {
   TASK_COMPLETE: '/sounds/366104__original_sound__confirmation-downward.wav',
   TASK_INCOMPLETE: '/sounds/807624__logicogonist__afrotom-weak-1.wav',
   TASK_DELETE: '/sounds/515835__newlocknew__ui_3-2-fhsandal-sinussytrusarpegiomultiprocessingrsmpl.wavz__drag-and-drop-1.wav',
-  TASK_DRAG: 'public/sounds/582602__nezuai__ui-sound-3.wav',
+  TASK_DRAG: '/sounds/582602__nezuai__ui-sound-3.wav',
   // Add more sounds here as needed
 } as const;
 
