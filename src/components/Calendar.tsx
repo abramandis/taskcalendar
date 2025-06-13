@@ -23,6 +23,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
   const [dropTarget, setDropTarget] = useState<{ day: Date; time: string } | null>(null);
   const [hoveredTask, setHoveredTask] = useState<HoverState | null>(null);
   const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null);
+  const [dayOffset, setDayOffset] = useState(0);
   const soundManager = SoundManager.getInstance();
 
   // Update current time every minute
@@ -64,6 +65,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
 
   const getDays = () => {
     const today = new Date();
+    today.setDate(today.getDate() + dayOffset);
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
     const nextDay = new Date(today);
@@ -220,6 +222,8 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
 
     setDraggedTask(null);
     setDropTarget(null);
+
+    soundManager.play('TASK_DRAG');
   };
 
   // Function to handle drag leave
@@ -238,6 +242,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
     }, 1000); // 1 second delay
   };
 
+  // Handle task leave
   const handleTaskLeave = () => {
     if (hoveredTask) {
       clearTimeout(hoveredTask.timeout);
@@ -253,15 +258,6 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
       }
     };
   }, [hoveredTask]);
-
-  // Update the completion handler
-  const handleTaskComplete = useCallback((task: Task, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!task.completed) {
-      soundManager.play('TASK_COMPLETE');
-    }
-    onUpdateTask({ ...task, completed: !task.completed });
-  }, [onUpdateTask]);
 
   // Add this handler function
   const handleTaskFormKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -297,17 +293,38 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
   return (
     <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg overflow-hidden transition-colors duration-200">
       {/* Calendar Header */}
-      <div className="grid grid-cols-3 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
-        {days.map((day, index) => (
-          <div key={index} className="p-4 text-center">
-            <div className="text-sm text-neutral-500 dark:text-neutral-400">
-              {day.date.toLocaleDateString('en-US', { weekday: 'long' })}
+      <div className="flex border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
+        <div className="w-16" /> {/* Spacer to align with time column */}
+        <div className="flex-1 grid grid-cols-3">
+          {days.map((day, index) => (
+            <div key={index} className="p-4 text-center relative">
+              {index === 0 && (
+                <button
+                  onClick={() => setDayOffset(dayOffset - 1)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50 transition-colors"
+                  title="Previous day"
+                >
+                  <span className="text-lg">←</span>
+                </button>
+              )}
+              <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                {day.date.toLocaleDateString('en-US', { weekday: 'long' })}
+              </div>
+              <div className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
+                {day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </div>
+              {index === days.length - 1 && (
+                <button
+                  onClick={() => setDayOffset(dayOffset + 1)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50 transition-colors"
+                  title="Next day"
+                >
+                  <span className="text-lg">→</span>
+                </button>
+              )}
             </div>
-            <div className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
-              {day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Calendar Grid */}
@@ -452,7 +469,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (task.completed) {
-                                  soundManager.play('TASK_INCOMPLETE');
+                                  //soundManager.play('TASK_INCOMPLETE');
                                 } else {
                                   soundManager.play('TASK_COMPLETE');
                                 }
