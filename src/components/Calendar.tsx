@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Task } from '../types';
 import { TaskEditForm } from './TaskEditForm';
-import { useSound } from '../contexts/SoundContext';
 import { SoundManager } from '../utils/sounds';
 
 interface CalendarProps {
@@ -424,27 +423,53 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                       ) : (
                         <div className="flex items-center justify-between gap-2">
                           <div className="font-medium text-sm truncate text-neutral-900 dark:text-neutral-50">{task.title}</div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (task.completed) {
-                                soundManager.play('TASK_INCOMPLETE');
-                              } else {
-                                soundManager.play('TASK_COMPLETE');
-                              }
-                              onUpdateTask({ ...task, completed: !task.completed });
-                            }}
-                            className={`flex-shrink-0 w-5 h-5 rounded-full transition-all duration-300 transform hover:scale-110 ${
-                              task.completed
-                                ? 'bg-accent-500 dark:bg-accent-400 shadow-lg shadow-accent-500/30'
-                                : 'bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600'
-                            }`}
-                            title={task.completed ? "Task completed! 🎉" : "Complete task"}
-                          >
-                            {task.completed && (
-                              <span className="flex items-center justify-center w-full h-full text-xs text-white animate-[bounce_0.8s_ease-in-out_1]">✓</span>
-                            )}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (task.duration > 30) {
+                                  onUpdateTask({ ...task, duration: task.duration - 30 });
+                                }
+                              }}
+                              onDoubleClick={(e) => e.stopPropagation()}
+                              className="flex-shrink-0 w-5 h-5 rounded-full transition-all duration-300 transform hover:scale-110 bg-primary-200 dark:bg-primary-700 hover:bg-primary-300 dark:hover:bg-primary-600"
+                              title="Decrease task by 30 minutes"
+                            >
+                              <span className="flex items-center justify-center w-full h-full text-xs text-primary-700 dark:text-primary-300">-</span>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onUpdateTask({ ...task, duration: task.duration + 30 });
+                              }}
+                              onDoubleClick={(e) => e.stopPropagation()}
+                              className="flex-shrink-0 w-5 h-5 rounded-full transition-all duration-300 transform hover:scale-110 bg-primary-200 dark:bg-primary-700 hover:bg-primary-300 dark:hover:bg-primary-600"
+                              title="Extend task by 30 minutes"
+                            >
+                              <span className="flex items-center justify-center w-full h-full text-xs text-primary-700 dark:text-primary-300">+</span>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (task.completed) {
+                                  soundManager.play('TASK_INCOMPLETE');
+                                } else {
+                                  soundManager.play('TASK_COMPLETE');
+                                }
+                                onUpdateTask({ ...task, completed: !task.completed });
+                              }}
+                              className={`flex-shrink-0 w-5 h-5 rounded-full transition-all duration-300 transform hover:scale-110 ${
+                                task.completed
+                                  ? 'bg-accent-500 dark:bg-accent-400 shadow-lg shadow-accent-500/30'
+                                  : 'bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600'
+                              }`}
+                              title={task.completed ? "Task completed! 🎉" : "Complete task"}
+                            >
+                              {task.completed && (
+                                <span className="flex items-center justify-center w-full h-full text-xs text-white animate-[bounce_0.8s_ease-in-out_1]">✓</span>
+                              )}
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
