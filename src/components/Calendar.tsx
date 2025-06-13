@@ -328,7 +328,14 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
       </div>
 
       {/* Calendar Grid */}
-      <div className="relative h-[600px] overflow-y-auto">
+      <div className="relative h-[600px] overflow-y-auto
+        [&::-webkit-scrollbar]:w-2
+        [&::-webkit-scrollbar-track]:bg-transparent
+        [&::-webkit-scrollbar-thumb]:rounded-full
+        [&::-webkit-scrollbar-thumb]:bg-neutral-300
+        dark:[&::-webkit-scrollbar-thumb]:bg-neutral-600
+        hover:[&::-webkit-scrollbar-thumb]:bg-neutral-400
+        dark:hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
         <div className="flex">
           {/* Time Slots */}
           <div className="sticky left-0 w-16 border-r border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
