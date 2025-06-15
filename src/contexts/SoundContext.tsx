@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { SoundManager } from '../utils/sounds';
+import { SoundManager, SOUNDS } from '../utils/sounds';
 
 interface SoundContextType {
   enabled: boolean;

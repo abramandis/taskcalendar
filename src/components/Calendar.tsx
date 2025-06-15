@@ -443,6 +443,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                             setEditingTask(null);
                             setClickPosition(null);
                           }}
+                          onSave={onUpdateTask}
                         />
                       ) : (
                         <div className="flex items-center justify-between gap-2">

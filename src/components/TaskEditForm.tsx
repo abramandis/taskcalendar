@@ -6,9 +6,10 @@ interface TaskEditFormProps {
   onDeleteTask: (id: string) => void;
   onEditSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
+  onSave: (task: Task) => void;
 }
 
-export function TaskEditForm({ task, clickPosition, onDeleteTask, onEditSubmit, onCancel }: TaskEditFormProps) {
+export function TaskEditForm({ task, clickPosition, onDeleteTask, onEditSubmit, onCancel, onSave }: TaskEditFormProps) {
   return createPortal(
     <div className="fixed inset-0 z-[9999]">
       <form 
