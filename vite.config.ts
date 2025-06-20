@@ -7,4 +7,11 @@ export default defineConfig({
   css: {
     postcss: './postcss.config.mjs',
   },
+  build: {
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name].[hash][extname]'
+      }
+    }
+  }
 }) 
