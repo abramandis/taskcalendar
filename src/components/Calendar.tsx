@@ -347,8 +347,8 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                   key={time}
                   className={`h-10 border-b ${
                     isHalfHour 
-                      ? 'border-dashed border-neutral-200 dark:border-neutral-700' 
-                      : 'border-neutral-100 dark:border-neutral-700'
+                      ? 'border-neutral-100 dark:border-neutral-700' 
+                      : 'border-dashed border-neutral-200 dark:border-neutral-700'
                   } flex items-center justify-end pr-2 ${
                     isDaytime(hour) 
                       ? 'bg-primary-50 dark:bg-primary-900/20' 
@@ -390,8 +390,8 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                       key={index}
                       className={`h-10 border-b ${
                         isHalfHour 
-                          ? 'border-dashed border-neutral-200 dark:border-neutral-700' 
-                          : 'border-neutral-100 dark:border-neutral-700'
+                          ? 'border-neutral-100 dark:border-neutral-700' 
+                          : 'border-dashed border-neutral-200 dark:border-neutral-700'
                       } ${
                         isDaytime(hour) 
                           ? 'bg-primary-50 dark:bg-primary-900/20' 
