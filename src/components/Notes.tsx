@@ -19,15 +19,15 @@ const Notes: React.FC<NotesProps> = ({ isExpanded = false, onToggleExpand, curre
   });
 
   // Function to resize textarea
-  const resizeTextarea = (element: HTMLTextAreaElement) => {
+  const resizeTextarea = (element: HTMLTextAreaElement | HTMLDivElement) => {
     element.style.height = 'auto';
     element.style.height = element.scrollHeight + 'px';
   };
 
-  // Resize all textareas on mount and when notes change
+  // Resize all contentEditable divs on mount and when notes change
   useEffect(() => {
-    const textareas = document.querySelectorAll('textarea');
-    textareas.forEach(textarea => resizeTextarea(textarea));
+    const contentEditableDivs = document.querySelectorAll('[contenteditable="true"]');
+    contentEditableDivs.forEach(div => resizeTextarea(div as HTMLDivElement));
   }, [notes]);
 
   const getOrCreateNoteForToday = () => {
@@ -135,32 +135,51 @@ const Notes: React.FC<NotesProps> = ({ isExpanded = false, onToggleExpand, curre
             </div>
             {notesByDate[date].map(note => (
               <div key={note.id} className="p-4">
-                <textarea
-                  value={note.content}
-                  onChange={(e) => {
-                    updateNote(note.id, e.target.value);
-                    resizeTextarea(e.target);
-                  }}
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
                   onInput={(e) => {
-                    resizeTextarea(e.target as HTMLTextAreaElement);
+                    const content = e.currentTarget.innerHTML;
+                    updateNote(note.id, content);
+                    resizeTextarea(e.currentTarget);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Tab') {
                       e.preventDefault();
-                      const target = e.target as HTMLTextAreaElement;
-                      const start = target.selectionStart;
-                      const end = target.selectionEnd;
-                      const newValue = note.content.substring(0, start) + '\t' + note.content.substring(end);
-                      updateNote(note.id, newValue);
-                      // Set cursor position after the tab
+                      document.execCommand('insertText', false, '        ');
+                    } else if (e.key === 'Backspace') {
+                      // Let the backspace happen naturally, then clean up any unwanted formatting
                       setTimeout(() => {
-                        target.setSelectionRange(start + 1, start + 1);
+                        const selection = window.getSelection();
+                        if (selection && selection.rangeCount > 0) {
+                          const range = selection.getRangeAt(0);
+                          // Remove any empty formatting tags
+                          const container = range.commonAncestorContainer;
+                          if (container.nodeType === Node.TEXT_NODE && container.textContent === '') {
+                            const parent = container.parentNode;
+                            if (parent && parent.nodeType === Node.ELEMENT_NODE) {
+                              const element = parent as HTMLElement;
+                              if (['B', 'I', 'U', 'STRONG', 'EM'].includes(element.tagName)) {
+                                element.remove();
+                              }
+                            }
+                          }
+                        }
                       }, 0);
                     }
                   }}
-                  className="w-full p-2 rounded-lg border-0 bg-transparent text-neutral-900 dark:text-neutral-50 focus:outline-none focus:ring-0 resize-none overflow-hidden"
-                  placeholder="Add your notes for the day..."
-                  rows={1}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const text = e.clipboardData.getData('text/plain');
+                    document.execCommand('insertText', false, text);
+                  }}
+                  className="w-full p-2 rounded-lg border-0 bg-transparent text-neutral-900 dark:text-neutral-50 focus:outline-none focus:ring-0 min-h-[1.5rem]"
+                  style={{ whiteSpace: 'pre-wrap' }}
+                  ref={(el) => {
+                    if (el && el.innerHTML !== note.content) {
+                      el.innerHTML = note.content;
+                    }
+                  }}
                 />
               </div>
             ))}
