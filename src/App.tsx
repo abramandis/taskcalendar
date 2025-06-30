@@ -12,6 +12,7 @@ function App() {
     return savedTasks ? JSON.parse(savedTasks) : [];
   });
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isNotesExpanded, setIsNotesExpanded] = useState(false);
 
   useEffect(() => {
     // Set dark mode by default
@@ -72,15 +73,20 @@ function App() {
               />
             </div>
             <div className="flex flex-col space-y-6">
-              <DayMetrics 
-                tasks={tasks}
-                date={new Date()}
-                sunriseHour={6}
-                sunsetHour={20}
-              />
+              {!isNotesExpanded && (
+                <DayMetrics 
+                  tasks={tasks}
+                  date={new Date()}
+                  sunriseHour={6}
+                  sunsetHour={20}
+                />
+              )}
               <CurrentTask tasks={tasks} />
               <div className="flex-1">
-                <Notes />
+                <Notes 
+                  isExpanded={isNotesExpanded}
+                  onToggleExpand={() => setIsNotesExpanded(!isNotesExpanded)}
+                />
               </div>
             </div>
           </div>

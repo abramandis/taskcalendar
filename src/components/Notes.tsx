@@ -6,7 +6,13 @@ interface NoteEntry {
   content: string;
 }
 
-const Notes: React.FC = () => {
+interface NotesProps {
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
+  currentTaskComponent?: React.ReactNode;
+}
+
+const Notes: React.FC<NotesProps> = ({ isExpanded = false, onToggleExpand, currentTaskComponent }) => {
   const [notes, setNotes] = useState<NoteEntry[]>(() => {
     const savedNotes = localStorage.getItem('notes');
     return savedNotes ? JSON.parse(savedNotes) : [];
@@ -64,15 +70,41 @@ const Notes: React.FC = () => {
   const sortedDates = Object.keys(notesByDate).sort((a, b) => b.localeCompare(a));
 
   return (
-    <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg transition-colors duration-200">
-      <div className="max-h-[310px] min-h-[310px] overflow-y-auto
+    <div className={`bg-white dark:bg-neutral-800 rounded-xl shadow-lg transition-colors duration-200 ${isExpanded ? 'h-[625px] flex flex-col' : 'flex flex-col'}`}>
+      <div className="relative">
+        <button
+          onClick={onToggleExpand}
+          className="absolute top-2 right-2 p-1 rounded-lg text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors z-20"
+          title={isExpanded ? "Collapse notes" : "Expand notes"}
+        >
+          {isExpanded ? (
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+          )}
+        </button>
+      </div>
+      
+      {isExpanded && currentTaskComponent && (
+        <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
+          {currentTaskComponent}
+        </div>
+      )}
+      
+      <div className={`overflow-y-auto
         [&::-webkit-scrollbar]:w-2
         [&::-webkit-scrollbar-track]:bg-transparent
         [&::-webkit-scrollbar-thumb]:rounded-full
         [&::-webkit-scrollbar-thumb]:bg-neutral-300
         dark:[&::-webkit-scrollbar-thumb]:bg-neutral-600
         hover:[&::-webkit-scrollbar-thumb]:bg-neutral-400
-        dark:hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
+        dark:hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500
+        ${isExpanded ? 'flex-1' : 'max-h-[310px] min-h-[310px]'}
+      `}>
         {!notes.find(note => note.date === new Date().toISOString().split('T')[0]) && (
           <div className="p-4">
             <button
