@@ -21,11 +21,7 @@ const CurrentTask: React.FC<CurrentTaskProps> = ({ tasks }) => {
     const taskStart = new Date(task.startTime);
     const taskEnd = new Date(taskStart.getTime() + task.duration * 60000);
     
-    const taskStartMinutes = taskStart.getHours() * 60 + taskStart.getMinutes();
-    const taskEndMinutes = taskEnd.getHours() * 60 + taskEnd.getMinutes();
-    const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-    
-    return nowMinutes >= taskStartMinutes && nowMinutes <= taskEndMinutes;
+    return currentTime >= taskStart && currentTime <= taskEnd;
   });
 
   if (!currentTask) {

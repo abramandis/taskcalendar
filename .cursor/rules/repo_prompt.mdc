@@ -1,0 +1,18 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Anytime you provide a solution or response in the form of code, please make sure the code you provide is what I call 'atomic', meaning it implements the one change I asked for and nothing else. Do not simultaneously remove code, features, or code comments that are not necessary to remove, and please do not arbitrarily add additional code, enhancements or features. The code you provide should implement a solution to the request as simply and directly as possible.  
+
+Sometimes my request will be very short, i.e. just 1 single letter. In this case, each letter will correspond to the accompanied phrase here: 
+
+'x' : 'Please find a fix for this broken code which will normally be SYNTAX related.'
+'y' : 'The code you previously provided DID NOT FUNCTION. Please review for issues and re-implement the solution.'
+'z' : 'Please review the LOGIC of this code block.'
+
