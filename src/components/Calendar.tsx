@@ -52,6 +52,29 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
     return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
   });
 
+  // Generate display time slots for every 30 minutes (12-hour format)
+  const displayTimeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
+    const hour = Math.floor(i / 2);
+    const minute = (i % 2) * 30;
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+    
+    // For hour marks (00 minutes), show just "11 PM" format
+    if (minute === 0) {
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        hour12: true
+      });
+    }
+    
+    // For half-hour marks (30 minutes), show "11:30 PM" format
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  });
+
   // Calculate sunrise and sunset times (simplified for demo)
   const { sunriseHour, sunsetHour } = useMemo(() => {
     const now = new Date();
@@ -117,7 +140,8 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
     });
   };
 
-  const handleDoubleClick = (day: Date, time: string) => {
+  const handleDoubleClick = (day: Date, timeIndex: number) => {
+    const time = timeSlots[timeIndex];
     setQuickAddTask({ day, time });
   };
 
@@ -356,7 +380,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                   }`}
                 >
                   {!isHalfHour && (
-                    <span className="text-xs text-neutral-400 dark:text-neutral-500">{time}</span>
+                    <span className="text-xs text-neutral-400 dark:text-neutral-500">{displayTimeSlots[index]}</span>
                   )}
                 </div>
               );
@@ -401,7 +425,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onUpdateTask, onAddTask, onD
                           ? 'bg-primary-100 dark:bg-primary-800/30'
                           : ''
                       }`}
-                      onDoubleClick={(e) => handleDoubleClick(day.date, time)}
+                      onDoubleClick={(e) => handleDoubleClick(day.date, index)}
                       onDragOver={(e) => handleDragOver(e, day.date, time)}
                       onDrop={(e) => handleDrop(e, day.date, time)}
                       onDragLeave={handleDragLeave}

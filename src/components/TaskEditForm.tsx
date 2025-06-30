@@ -25,7 +25,7 @@ export function TaskEditForm({ task, clickPosition, onDeleteTask, onEditSubmit, 
             e.stopPropagation();
             onDeleteTask(task.id);
           }}
-          className="absolute -right-3 -top-3 w-5 h-5 rounded-full transition-all duration-300 transform hover:scale-110 bg-red-100/90 dark:bg-red-900/60 hover:bg-red-200 dark:hover:bg-red-800 text-red-500 dark:text-red-400 shadow-lg border border-red-200/90 dark:border-red-800/90"
+          className="absolute -right-3 -top-3 w-5 h-5 rounded-full transition-all duration-300 transform hover:scale-110 bg-red-200 dark:bg-red-800 text-red-500 dark:text-red-400 shadow-lg border border-red-200/90 dark:border-red-800/90 hover:bg-red-300 dark:hover:bg-red-700 hover:shadow-xl"
           title="Delete task"
         >
           <span className="flex items-center justify-center w-full h-full text-xs">×</span>
