@@ -144,6 +144,20 @@ const Notes: React.FC<NotesProps> = ({ isExpanded = false, onToggleExpand, curre
                   onInput={(e) => {
                     resizeTextarea(e.target as HTMLTextAreaElement);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Tab') {
+                      e.preventDefault();
+                      const target = e.target as HTMLTextAreaElement;
+                      const start = target.selectionStart;
+                      const end = target.selectionEnd;
+                      const newValue = note.content.substring(0, start) + '\t' + note.content.substring(end);
+                      updateNote(note.id, newValue);
+                      // Set cursor position after the tab
+                      setTimeout(() => {
+                        target.setSelectionRange(start + 1, start + 1);
+                      }, 0);
+                    }
+                  }}
                   className="w-full p-2 rounded-lg border-0 bg-transparent text-neutral-900 dark:text-neutral-50 focus:outline-none focus:ring-0 resize-none overflow-hidden"
                   placeholder="Add your notes for the day..."
                   rows={1}
